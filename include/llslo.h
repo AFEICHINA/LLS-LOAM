@@ -16,7 +16,7 @@
 #include "error_compute.h"
 #include "filter.hpp"
 #include "common_reg.hpp"
-#include "sensors/gnssins.h"
+// #include "sensors/gnssins.h"
 
 // proj4
 #include <proj_api.h>

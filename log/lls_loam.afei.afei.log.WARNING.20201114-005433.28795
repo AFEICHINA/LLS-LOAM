@@ -1,0 +1,4 @@
+Log file created at: 2020/11/14 00:54:33
+Running on machine: afei
+Log line format: [IWEF]mmdd hh:mm:ss.uuuuuu threadid file:line] msg
+W1114 00:54:33.315829 28795 llslo.cpp:1630]  LO diff: 144.436 OXTS diff: 143.591  Difference: 0.845416

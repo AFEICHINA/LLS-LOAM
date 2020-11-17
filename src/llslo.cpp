@@ -10,77 +10,77 @@ namespace lls_loam {
 // Instead of the KITTI's projection calculation method
 // According to experiment, there are up to 5 meter difference between the two projection method in a local map (1km^2)
 // So we choose to use the standard UTM projection
-Eigen::Matrix4d GetTransform(sensor::gnssins_info_t &gnss_info) {
+// Eigen::Matrix4d GetTransform(sensor::gnssins_info_t &gnss_info) {
     
-    const static double global_scale = 0.863828;
-    const static double earth_radius = 6378137.0; // unit m
+//     const static double global_scale = 0.863828;
+//     const static double earth_radius = 6378137.0; // unit m
 
-    //double lat = gnss_info.lat * M_PI / 180;
-    //double lon = gnss_info.lon * M_PI / 180; //unit: rad
-    double lat = gnss_info.lat; //unit:degree
-    double lon = gnss_info.lon; //unit:degree
-    double alt = gnss_info.alt;
-    double roll = gnss_info.roll * M_PI / 180;
-    double pitch = gnss_info.pitch * M_PI / 180;
-    double yaw = gnss_info.yaw * M_PI / 180;
+//     //double lat = gnss_info.lat * M_PI / 180;
+//     //double lon = gnss_info.lon * M_PI / 180; //unit: rad
+//     double lat = gnss_info.lat; //unit:degree
+//     double lon = gnss_info.lon; //unit:degree
+//     double alt = gnss_info.alt;
+//     double roll = gnss_info.roll * M_PI / 180;
+//     double pitch = gnss_info.pitch * M_PI / 180;
+//     double yaw = gnss_info.yaw * M_PI / 180;
 
-    // Calculate Rotation from roll, pitch, yaw
-    Eigen::Matrix3d Rx(Eigen::Matrix3d::Identity());
-    Rx(1, 1) = Rx(2, 2) = cos(roll);
-    Rx(2, 1) = sin(roll);
-    Rx(1, 2) = -Rx(2, 1);
+//     // Calculate Rotation from roll, pitch, yaw
+//     Eigen::Matrix3d Rx(Eigen::Matrix3d::Identity());
+//     Rx(1, 1) = Rx(2, 2) = cos(roll);
+//     Rx(2, 1) = sin(roll);
+//     Rx(1, 2) = -Rx(2, 1);
 
-    Eigen::Matrix3d Ry(Eigen::Matrix3d::Identity());
-    Ry(0, 0) = Ry(2, 2) = cos(pitch);
-    Ry(0, 2) = sin(pitch);
-    Ry(2, 0) = -Ry(0, 2);
+//     Eigen::Matrix3d Ry(Eigen::Matrix3d::Identity());
+//     Ry(0, 0) = Ry(2, 2) = cos(pitch);
+//     Ry(0, 2) = sin(pitch);
+//     Ry(2, 0) = -Ry(0, 2);
 
-    Eigen::Matrix3d Rz(Eigen::Matrix3d::Identity());
-    Rz(0, 0) = Rz(1, 1) = cos(yaw);
-    Rz(1, 0) = sin(yaw);
-    Rz(0, 1) = -Rz(1, 0);
+//     Eigen::Matrix3d Rz(Eigen::Matrix3d::Identity());
+//     Rz(0, 0) = Rz(1, 1) = cos(yaw);
+//     Rz(1, 0) = sin(yaw);
+//     Rz(0, 1) = -Rz(1, 0);
 
-    // A reference: Compare of the same single points' coordinate calculated by UTM and KITTI's projection
-    // UTM 51 Zone Proj X:396595.067945 , Y:3414994.320534
-    // KITTI Proj X:11723782.924684 , Y:3122787.514189
+//     // A reference: Compare of the same single points' coordinate calculated by UTM and KITTI's projection
+//     // UTM 51 Zone Proj X:396595.067945 , Y:3414994.320534
+//     // KITTI Proj X:11723782.924684 , Y:3122787.514189
     
-    // Use proj4 to do the UTM projection
-    projPJ pj_merc, pj_latlong;
+//     // Use proj4 to do the UTM projection
+//     projPJ pj_merc, pj_latlong;
     
-    // Notice the UTM projection zone
-    // Shanghai/Hangzhou UTM-WGS84 Zone 51 N
-    // Tokyo 54 N
-    // Beijing/Shenzhen/HongKong 50 N
+//     // Notice the UTM projection zone
+//     // Shanghai/Hangzhou UTM-WGS84 Zone 51 N
+//     // Tokyo 54 N
+//     // Beijing/Shenzhen/HongKong 50 N
     
-    // From WGS84 geodesy (latlon) system to WGS84 UTM map system (XYZ)  
-    if (!(pj_merc = pj_init_plus("+proj=utm +zone=51 +north +ellps=WGS84 +datum=WGS84 +units=m +no_defs"))) 
-        exit(1);
-    if (!(pj_latlong = pj_init_plus("+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs"))) //WGS84
-        exit(1);
-    double x_utm = lon * DEG_TO_RAD;
-    double y_utm = lat * DEG_TO_RAD;
+//     // From WGS84 geodesy (latlon) system to WGS84 UTM map system (XYZ)  
+//     if (!(pj_merc = pj_init_plus("+proj=utm +zone=51 +north +ellps=WGS84 +datum=WGS84 +units=m +no_defs"))) 
+//         exit(1);
+//     if (!(pj_latlong = pj_init_plus("+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs"))) //WGS84
+//         exit(1);
+//     double x_utm = lon * DEG_TO_RAD;
+//     double y_utm = lat * DEG_TO_RAD;
 
-    int p = pj_transform(pj_latlong, pj_merc, 1, 1, &x_utm, &y_utm, NULL);
+//     int p = pj_transform(pj_latlong, pj_merc, 1, 1, &x_utm, &y_utm, NULL);
 
-    //Free Memory
-    pj_free(pj_merc);
-    pj_free(pj_latlong);
+//     //Free Memory
+//     pj_free(pj_merc);
+//     pj_free(pj_latlong);
 
-    Eigen::Vector3d trans;
-    trans[0] = x_utm;
-    trans[1] = y_utm;
-    trans[2] = alt;
+//     Eigen::Vector3d trans;
+//     trans[0] = x_utm;
+//     trans[1] = y_utm;
+//     trans[2] = alt;
 
-    Eigen::Matrix4d pose = Eigen::Matrix4d::Identity();
+//     Eigen::Matrix4d pose = Eigen::Matrix4d::Identity();
     
-    //TODO //Check the reason
-    pose.block<3, 3>(0, 0) = Rz * Ry * Rx;
-    // Should be z y x
+//     //TODO //Check the reason
+//     pose.block<3, 3>(0, 0) = Rz * Ry * Rx;
+//     // Should be z y x
     
-    pose.block<3, 1>(0, 3) << trans[0], trans[1], trans[2];
+//     pose.block<3, 1>(0, 3) << trans[0], trans[1], trans[2];
 
-    return pose;
-}
+//     return pose;
+// }
 
 Transaction::Transaction() {}
 
